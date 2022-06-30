@@ -11,5 +11,13 @@
     <string name="close">Close</string>
     <string name="select_icon">Select icon</string>
     <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
     <string name="field_cant_be_empty">This field can\'t be empty</string>
+    <string name="reward_added">Reward added</string>
+    <string name="reward_updated">Reward updated</string>
+    <string name="open_menu">Open menu</string>
+    <string name="delete_reward">Delete reward</string>
+    <string name="reward_deleted">Reward deleted</string>
+    <string name="confirm_deletion">Confirm deletion</string>
+    <string name="confirm_reward_deletion_text">Are you sure you want to delete? This can not be  undone!</string>
 </resources>

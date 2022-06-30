@@ -51,29 +51,32 @@ private fun ScreenContent() {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
-            BottomNavigation {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                bottomNavDestinations.forEach { bottomNavDestination ->
-                    BottomNavigationItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.route } == true,
-                        onClick = {
-                            navController.navigate(bottomNavDestination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
+            val currentDestination = navBackStackEntry?.destination
+            if (hideBottomBar == null || !hideBottomBar) {
+                BottomNavigation {
+                    bottomNavDestinations.forEach { bottomNavDestination ->
+                        BottomNavigationItem(
+                            selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.route } == true,
+                            onClick = {
+                                navController.navigate(bottomNavDestination.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        label = { Text(text = stringResource(id = bottomNavDestination.label)) },
-                        icon = {
-                            Icon(
-                                bottomNavDestination.icon,
-                                contentDescription = null
-                            )
-                        },
-                    )
+                            },
+                            label = { Text(text = stringResource(id = bottomNavDestination.label)) },
+                            icon = {
+                                Icon(
+                                    bottomNavDestination.icon,
+                                    contentDescription = null
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -91,10 +94,15 @@ private fun ScreenContent() {
             }
             composable(
                 route = FullDestinations.AddEditRewardScreen.route + "?$ARG_REWARD_ID={$ARG_REWARD_ID}",
-                arguments = listOf(navArgument(ARG_REWARD_ID) {
-                    type = NavType.LongType
-                    defaultValue = NO_REWARD_ID
-                })
+                arguments = listOf(
+                    navArgument(ARG_REWARD_ID) {
+                        type = NavType.LongType
+                        defaultValue = NO_REWARD_ID
+                    },
+                    navArgument(ARG_HIDE_BOTTOM_BAR) {
+                        defaultValue = true
+                    }
+                )
             ) {
                 AddEditRewardScreen(navController)
             }
@@ -139,3 +147,5 @@ fun DefaultPreview() {
         }
     }
 }
+
+const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"

@@ -12,8 +12,11 @@ interface RewardDao {
     @Query("SELECT * FROM REWARDS WHERE id = :rewardId")
     suspend fun getRewardById(rewardId: Long): Reward?
 
+    @Delete
+    suspend fun deleteReward(reward: Reward)
+
     @Update
-    suspend fun updateReward(reward:Reward)
+    suspend fun updateReward(reward: Reward)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReward(reward: Reward)

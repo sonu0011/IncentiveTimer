@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.incentivetimer.core.ui.IconKey
-import com.example.incentivetimer.core.ui.defaultRewardIcon
 import com.example.incentivetimer.data.Reward
 import com.example.incentivetimer.data.RewardDao
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,6 +46,12 @@ class AddEditRewardVieModel @Inject constructor(
     val showRewardIconSelectionDialog: LiveData<Boolean> = showRewardIconSelectionDialogLiveData
 
 
+    private val showRewardDeleteConfirmationDialogLiveData =
+        savedStateHandle.getLiveData("showRewardDeleteConfirmationDialogLiveData", false)
+    val showRewardDeleteConfirmationDialog: LiveData<Boolean> =
+        showRewardDeleteConfirmationDialogLiveData
+
+
     private val rewardNameInputErrorLiveData =
         savedStateHandle.getLiveData("rewardNameInputErrorLiveData", false)
     val rewardNameInputError: LiveData<Boolean> = rewardNameInputErrorLiveData
@@ -59,14 +64,17 @@ class AddEditRewardVieModel @Inject constructor(
                 populateEmptyInputValuesWithRewardData()
             }
         } else {
-            populateInputValuesWithDefaultValues()
+            populateEmptyValuesWithDefaults()
         }
     }
 
-    private fun populateInputValuesWithDefaultValues() {
-        rewardNameLiveData.value = ""
-        chanceLiveData.value = 10
-        rewardIconKeyLiveData.value = IconKey.STAR
+    private fun populateEmptyValuesWithDefaults() {
+        if (rewardNameLiveData.value == null)
+            rewardNameLiveData.value = ""
+        if (chanceLiveData.value == null)
+            chanceLiveData.value = 10
+        if (rewardIconKeyLiveData.value == null)
+            rewardIconKeyLiveData.value = IconKey.STAR
     }
 
     private fun populateEmptyInputValuesWithRewardData() {
@@ -133,7 +141,25 @@ class AddEditRewardVieModel @Inject constructor(
     }
 
     override fun onRewardIconDialogDismissRequest() {
-        showRewardIconSelectionDialogLiveData.value = false
+        showRewardDeleteConfirmationDialogLiveData.value = false
+    }
+
+    override fun onDeleteRewardClicked() {
+        showRewardDeleteConfirmationDialogLiveData.value = true
+    }
+
+    override fun onDeleteRewardConfirmed() {
+        viewModelScope.launch {
+            val reward = reward
+            if (reward != null) {
+                rewardDao.deleteReward(reward)
+                eventChannel.send(AddEditRewardEvent.RewardDeleted)
+            }
+        }
+    }
+
+    override fun onDeleteRewardDialogDismiss() {
+        showRewardDeleteConfirmationDialogLiveData.value = true
     }
 
     override fun onIconSelected(iconKey: IconKey) {
@@ -149,7 +175,12 @@ class AddEditRewardVieModel @Inject constructor(
 sealed class AddEditRewardEvent {
     object RewardCreated : AddEditRewardEvent()
     object RewardUpdated : AddEditRewardEvent()
+    object RewardDeleted : AddEditRewardEvent()
 }
 
 const val ARG_REWARD_ID = "rewardId"
 const val NO_REWARD_ID = -1L
+const val ADD_EDIT_REWARD_RESULT = "ADD_EDIT_REWARD_RESULT"
+const val RESULT_REWARD_ADDED = "RESULT_REWARD_ADDED"
+const val RESULT_REWARD_UPDATED = "RESULT_REWARD_UPDATED"
+const val RESULT_REWARD_DELETED = "RESULT_REWARD_DELETED"

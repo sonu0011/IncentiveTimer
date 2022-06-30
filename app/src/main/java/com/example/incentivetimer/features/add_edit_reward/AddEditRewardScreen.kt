@@ -5,11 +5,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,6 +31,9 @@ interface AddEditRewardScreenActions {
     fun onRewardIconButtonClicked()
     fun onRewardIconDialogDismissRequest()
     fun onIconSelected(iconKey: IconKey)
+    fun onDeleteRewardClicked()
+    fun onDeleteRewardConfirmed()
+    fun onDeleteRewardDialogDismiss()
 }
 
 @Composable
@@ -40,9 +44,12 @@ fun AddEditRewardScreen(
     val isEditMode = viewModel.isEditMode
     val rewardNameInput by viewModel.rewardNameInput.observeAsState("")
     val chanceInput by viewModel.chanceInput.observeAsState(10)
-    val shouldShowRewardIconSelectedDialog by viewModel.showRewardIconSelectionDialog.observeAsState(
-        false
-    )
+    val shouldShowRewardIconSelectedDialog by
+    viewModel.showRewardIconSelectionDialog.observeAsState(false)
+
+    val shouldShowRewardDeleteConfirmationDialog by
+    viewModel.showRewardDeleteConfirmationDialog.observeAsState(false)
+
     val rewardIconSelection by viewModel.rewardIconKey.observeAsState(defaultRewardIcon)
     val rewardNameInputError by viewModel.rewardNameInputError.observeAsState(false)
 
@@ -50,9 +57,21 @@ fun AddEditRewardScreen(
         viewModel.events.collect { event ->
             when (event) {
                 AddEditRewardEvent.RewardCreated -> {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_ADDED
+                    )
                     navController.popBackStack()
                 }
                 AddEditRewardEvent.RewardUpdated -> {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_UPDATED
+                    )
+                    navController.popBackStack()
+                }
+                AddEditRewardEvent.RewardDeleted -> {
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_DELETED
+                    )
                     navController.popBackStack()
                 }
             }.exhaustive
@@ -68,6 +87,7 @@ fun AddEditRewardScreen(
         actions = viewModel,
         shouldShowRewardIconSelectedDialog = shouldShowRewardIconSelectedDialog,
         hasRewardNameInputError = rewardNameInputError,
+        shouldShowRewardDeleteConfirmationDialog = shouldShowRewardDeleteConfirmationDialog,
         onCloseClicked = { navController.popBackStack() },
     )
 
@@ -82,6 +102,7 @@ private fun ScreenContent(
     onCloseClicked: () -> Unit,
     actions: AddEditRewardScreenActions,
     hasRewardNameInputError: Boolean,
+    shouldShowRewardDeleteConfirmationDialog: Boolean,
     shouldShowRewardIconSelectedDialog: Boolean,
 ) {
     Scaffold(
@@ -100,6 +121,31 @@ private fun ScreenContent(
                         )
                     }
                 },
+                actions = {
+                    if (isEditMode) {
+                        var expended by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { expended = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = stringResource(id = R.string.open_menu)
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = expended,
+                                onDismissRequest = { expended = false }) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        expended = false
+                                        actions.onDeleteRewardClicked()
+                                    }
+                                ) {
+                                    Text(text = stringResource(id = R.string.delete_reward))
+                                }
+                            }
+                        }
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -109,19 +155,29 @@ private fun ScreenContent(
                     contentDescription = stringResource(id = R.string.add_new_reward)
                 )
             }
-        }
-    ) {
+        },
+
+        ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            val focusRequester by remember { mutableStateOf(FocusRequester()) }
+
             TextField(
                 value = rewardNameInput,
                 onValueChange = { input ->
                     actions.onRewardNameInputChanged(input)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 label = { Text(text = stringResource(id = R.string.reward_name)) },
                 singleLine = true,
                 isError = hasRewardNameInputError
             )
+            if (!isEditMode) {
+                LaunchedEffect(key1 = true) {
+                    focusRequester.requestFocus()
+                }
+            }
             if (hasRewardNameInputError) {
                 Text(
                     text = stringResource(id = R.string.field_cant_be_empty),
@@ -156,6 +212,28 @@ private fun ScreenContent(
         RewardIconSelectionDialog(
             onDismissRequest = actions::onRewardIconDialogDismissRequest,
             onIconSelected = actions::onIconSelected,
+        )
+    }
+
+    if (shouldShowRewardDeleteConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = actions::onRewardIconDialogDismissRequest,
+            title = {
+                Text(text = stringResource(id = R.string.confirm_deletion))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.confirm_reward_deletion_text))
+            },
+            confirmButton = {
+                TextButton(onClick = actions::onDeleteRewardConfirmed) {
+                    Text(text = stringResource(id = R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = actions::onRewardIconDialogDismissRequest) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
         )
     }
 }
