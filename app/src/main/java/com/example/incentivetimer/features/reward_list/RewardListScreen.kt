@@ -196,7 +196,7 @@ private fun RewardItem(
             )
             Column() {
                 Text(
-                    text = reward.title,
+                    text = reward.name,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.h6
                 )

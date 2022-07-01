@@ -217,7 +217,7 @@ private fun ScreenContent(
 
     if (shouldShowRewardDeleteConfirmationDialog) {
         AlertDialog(
-            onDismissRequest = actions::onRewardIconDialogDismissRequest,
+            onDismissRequest = actions::onDeleteRewardDialogDismiss,
             title = {
                 Text(text = stringResource(id = R.string.confirm_deletion))
             },
@@ -230,7 +230,7 @@ private fun ScreenContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = actions::onRewardIconDialogDismissRequest) {
+                TextButton(onClick = actions::onDeleteRewardDialogDismiss) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

@@ -31,7 +31,7 @@ abstract class ITDatabase : RoomDatabase() {
                 rewardDao.insertReward(
                     Reward(
                         iconKey = IconKey.CAKE,
-                        title = "1 piece of cake",
+                        name = "1 piece of cake",
                         chanceInPercent = 5
                     )
                 )
@@ -39,7 +39,7 @@ abstract class ITDatabase : RoomDatabase() {
                 rewardDao.insertReward(
                     Reward(
                         iconKey = IconKey.BATH_TUB,
-                        title = "1 piece of cake",
+                        name = "1 piece of cake",
                         chanceInPercent = 5
                     )
                 )
@@ -47,7 +47,7 @@ abstract class ITDatabase : RoomDatabase() {
                 rewardDao.insertReward(
                     Reward(
                         iconKey = IconKey.TV,
-                        title = "1 piece of cake",
+                        name = "1 piece of cake",
                         chanceInPercent = 5
                     )
                 )
