@@ -17,16 +17,18 @@ fun TimerScreen(
     navController: NavController
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.timer))
-                }
-            )
-        },
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "Timer")
         }
     }
+}
+
+@Composable
+fun TimerScreenTopBar() {
+    TopAppBar(
+        title = {
+            Text(text = stringResource(id = R.string.timer))
+        }
+    )
 }

@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.incentivetimer.R
-import com.example.incentivetimer.application.FullDestinations
 import com.example.incentivetimer.core.ui.IconKey
 import com.example.incentivetimer.core.ui.listBottomPadding
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
@@ -80,10 +79,10 @@ fun RewardListScreen(
     ScreenContent(
         scaffoldState = scaffoldState,
         onAddNewRewardClicked = {
-            navController.navigate(FullDestinations.AddEditRewardScreen.route)
+            navController.navigate(AddEditRewardScreenSpec.buildRoute())
         },
         onRewardItemClicked = { id ->
-            navController.navigate(FullDestinations.AddEditRewardScreen.route + "?$ARG_REWARD_ID=$id")
+            navController.navigate(AddEditRewardScreenSpec.buildRoute(id))
         },
         rewardList = rewards
     )
@@ -99,13 +98,6 @@ private fun ScreenContent(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(id = R.string.reward_list))
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier,
@@ -205,6 +197,15 @@ private fun RewardItem(
         }
     }
 
+}
+
+@Composable
+fun RewardListScreenTopBar() {
+    TopAppBar(
+        title = {
+            Text(text = stringResource(id = R.string.reward_list))
+        }
+    )
 }
 
 @Preview(

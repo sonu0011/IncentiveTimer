@@ -19,19 +19,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.incentivetimer.R
-import com.example.incentivetimer.features.add_edit_reward.AddEditRewardScreen
-import com.example.incentivetimer.features.reward_list.RewardListScreen
-import com.example.incentivetimer.features.timer.TimerScreen
+import com.example.incentivetimer.core.screenspecs.ScreenSpec
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
-import com.example.incentivetimer.features.add_edit_reward.ARG_REWARD_ID
-import com.example.incentivetimer.features.add_edit_reward.NO_REWARD_ID
+import com.example.incentivetimer.features.add_edit_reward.AddEditRewardScreenSpec
+import com.example.incentivetimer.features.reward_list.RewardListScreenSpec
+import com.example.incentivetimer.features.timer.TimeScreenSpec
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -49,18 +46,31 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun ScreenContent() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
+    val currentDestination = navBackStackEntry?.destination
+
+    val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
+
+
     Scaffold(
+        topBar = {
+            val navBackStackEntry = navBackStackEntry
+            if (navBackStackEntry != null) {
+                screenSpec?.TopBar(
+                    navController = navController,
+                    navBackStackEntry = navBackStackEntry
+                )
+            }
+        },
         bottomBar = {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-            val currentDestination = navBackStackEntry?.destination
             if (hideBottomBar == null || !hideBottomBar) {
                 BottomNavigation {
                     bottomNavDestinations.forEach { bottomNavDestination ->
                         BottomNavigationItem(
-                            selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.route } == true,
+                            selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.screenSpec.navHostRoute } == true,
                             onClick = {
-                                navController.navigate(bottomNavDestination.route) {
+                                navController.navigate(bottomNavDestination.screenSpec.navHostRoute) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
@@ -84,27 +94,19 @@ private fun ScreenContent() {
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = bottomNavDestinations[0].route
+            startDestination = bottomNavDestinations[0].screenSpec.navHostRoute
         ) {
-            composable(BottomNavDestination.Timer.route) {
-                TimerScreen(navController)
-            }
-            composable(BottomNavDestination.RewardList.route) {
-                RewardListScreen(navController)
-            }
-            composable(
-                route = FullDestinations.AddEditRewardScreen.route + "?$ARG_REWARD_ID={$ARG_REWARD_ID}",
-                arguments = listOf(
-                    navArgument(ARG_REWARD_ID) {
-                        type = NavType.LongType
-                        defaultValue = NO_REWARD_ID
-                    },
-                    navArgument(ARG_HIDE_BOTTOM_BAR) {
-                        defaultValue = true
-                    }
-                )
-            ) {
-                AddEditRewardScreen(navController)
+            ScreenSpec.allScreens.values.forEach { screenSpec ->
+                composable(
+                    route = screenSpec.navHostRoute,
+                    arguments = screenSpec.arguments,
+                    deepLinks = screenSpec.deepLinks
+                ) { navBackStackEntry ->
+                    screenSpec.Content(
+                        navController = navController,
+                        navBackStackEntry = navBackStackEntry
+                    )
+                }
             }
         }
     }
@@ -116,17 +118,29 @@ val bottomNavDestinations = listOf(
 )
 
 sealed class BottomNavDestination(
-    val route: String,
+    val screenSpec: ScreenSpec,
     val icon: ImageVector,
     @StringRes val label: Int
 ) {
-    object Timer : BottomNavDestination("timer", Icons.Default.Timer, R.string.timer)
+    object Timer :
+        BottomNavDestination(
+            screenSpec = TimeScreenSpec,
+            Icons.Default.Timer,
+            R.string.timer
+        )
+
     object RewardList :
-        BottomNavDestination("reward_list", Icons.Default.List, R.string.reward_list)
+        BottomNavDestination(
+            screenSpec = RewardListScreenSpec,
+            Icons.Default.List,
+            R.string.reward_list
+        )
 }
 
-sealed class FullDestinations(val route: String) {
-    object AddEditRewardScreen : FullDestinations("add_edit_screen")
+sealed class FullDestinations(
+    val screenSpec: ScreenSpec
+) {
+    object AddEditRewardScreen : FullDestinations(screenSpec = AddEditRewardScreenSpec)
 }
 
 @Preview(

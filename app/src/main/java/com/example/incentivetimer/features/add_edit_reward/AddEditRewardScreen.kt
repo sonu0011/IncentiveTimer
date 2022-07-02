@@ -106,48 +106,6 @@ private fun ScreenContent(
     shouldShowRewardIconSelectedDialog: Boolean,
 ) {
     Scaffold(
-        topBar = {
-            val appTitle = if (isEditMode) stringResource(id = R.string.edit_reward)
-            else stringResource(id = R.string.add_reward)
-            TopAppBar(
-                title = {
-                    Text(text = appTitle)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { onCloseClicked() }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(id = R.string.close)
-                        )
-                    }
-                },
-                actions = {
-                    if (isEditMode) {
-                        var expended by remember { mutableStateOf(false) }
-                        Box {
-                            IconButton(onClick = { expended = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(id = R.string.open_menu)
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = expended,
-                                onDismissRequest = { expended = false }) {
-                                DropdownMenuItem(
-                                    onClick = {
-                                        expended = false
-                                        actions.onDeleteRewardClicked()
-                                    }
-                                ) {
-                                    Text(text = stringResource(id = R.string.delete_reward))
-                                }
-                            }
-                        }
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = actions::onSaveClicked) {
                 Icon(
@@ -236,6 +194,54 @@ private fun ScreenContent(
             },
         )
     }
+}
+
+@Composable
+fun AddEditRewardScreenTopBar(
+    isEditMode: Boolean,
+    actions: AddEditRewardScreenActions,
+    onCloseClicked: () -> Unit,
+) {
+    val appTitle = if (isEditMode) stringResource(id = R.string.edit_reward)
+    else stringResource(id = R.string.add_reward)
+    TopAppBar(
+        title = {
+            Text(text = appTitle)
+        },
+        navigationIcon = {
+            IconButton(onClick = { onCloseClicked() }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(id = R.string.close)
+                )
+            }
+        },
+        actions = {
+            if (isEditMode) {
+                var expended by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { expended = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(id = R.string.open_menu)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expended,
+                        onDismissRequest = { expended = false }) {
+                        DropdownMenuItem(
+                            onClick = {
+                                expended = false
+                                actions.onDeleteRewardClicked()
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.delete_reward))
+                        }
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable

@@ -17,15 +17,10 @@ class AddEditRewardVieModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val rewardDao: RewardDao
 ) : ViewModel(), AddEditRewardScreenActions {
-
-    private companion object {
-        const val KEY_REWARD_LIVE_DATA = "KEY_REWARD_LIVE_DATA"
-    }
-
     private var rewardLiveData = savedStateHandle.getLiveData<Reward>(KEY_REWARD_LIVE_DATA)
 
-    private val rewardId = savedStateHandle.get<Long>(ARG_REWARD_ID)
-    val isEditMode = rewardId != NO_REWARD_ID
+    private val rewardId = AddEditRewardScreenSpec.getRewardIdFromSavedStateHandle(savedStateHandle)
+    val isEditMode = AddEditRewardScreenSpec.isEditMode(rewardId)
 
     private val eventChannel = Channel<AddEditRewardEvent>()
     val events: Flow<AddEditRewardEvent> = eventChannel.receiveAsFlow()
@@ -144,8 +139,7 @@ sealed class AddEditRewardEvent {
     object RewardDeleted : AddEditRewardEvent()
 }
 
-const val ARG_REWARD_ID = "rewardId"
-const val NO_REWARD_ID = -1L
+const val KEY_REWARD_LIVE_DATA = "KEY_REWARD_LIVE_DATA"
 const val ADD_EDIT_REWARD_RESULT = "ADD_EDIT_REWARD_RESULT"
 const val RESULT_REWARD_ADDED = "RESULT_REWARD_ADDED"
 const val RESULT_REWARD_UPDATED = "RESULT_REWARD_UPDATED"
