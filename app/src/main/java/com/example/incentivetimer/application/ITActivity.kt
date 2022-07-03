@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -132,8 +133,8 @@ sealed class BottomNavDestination(
     object RewardList :
         BottomNavDestination(
             screenSpec = RewardListScreenSpec,
-            Icons.Default.List,
-            R.string.reward_list
+            Icons.Default.Star,
+            R.string.rewards
         )
 }
 

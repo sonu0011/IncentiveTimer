@@ -1,4 +1,4 @@
-package com.example.incentivetimer.core.composables
+package com.example.incentivetimer.core.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
