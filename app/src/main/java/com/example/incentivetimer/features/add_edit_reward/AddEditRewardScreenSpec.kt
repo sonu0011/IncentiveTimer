@@ -1,11 +1,16 @@
 package com.example.incentivetimer.features.add_edit_reward
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.*
 import com.example.incentivetimer.application.ARG_HIDE_BOTTOM_BAR
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
+import com.example.incentivetimer.core.ui.defaultRewardIcon
+import com.example.incentivetimer.core.util.exhaustive
 
 object AddEditRewardScreenSpec : ScreenSpec {
     override val navHostRoute: String = "add_edit_screen?$ARG_REWARD_ID={$ARG_REWARD_ID}"
@@ -44,7 +49,55 @@ object AddEditRewardScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(navController: NavController, navBackStackEntry: NavBackStackEntry) {
-        AddEditRewardScreen(navController = navController)
+        val viewModel: AddEditRewardVieModel = hiltViewModel(navBackStackEntry)
+        val isEditMode = viewModel.isEditMode
+        val rewardNameInput by viewModel.rewardNameInput.observeAsState("")
+        val chanceInput by viewModel.chanceInput.observeAsState(10)
+        val shouldShowRewardIconSelectedDialog by
+        viewModel.showRewardIconSelectionDialog.observeAsState(false)
+
+        val shouldShowRewardDeleteConfirmationDialog by
+        viewModel.showRewardDeleteConfirmationDialog.observeAsState(false)
+
+        val rewardIconSelection by viewModel.rewardIconKey.observeAsState(defaultRewardIcon)
+        val rewardNameInputError by viewModel.rewardNameInputError.observeAsState(false)
+
+        LaunchedEffect(Unit) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    AddEditRewardEvent.RewardCreated -> {
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            ADD_EDIT_REWARD_RESULT, RESULT_REWARD_ADDED
+                        )
+                        navController.popBackStack()
+                    }
+                    AddEditRewardEvent.RewardUpdated -> {
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            ADD_EDIT_REWARD_RESULT, RESULT_REWARD_UPDATED
+                        )
+                        navController.popBackStack()
+                    }
+                    AddEditRewardEvent.RewardDeleted -> {
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            ADD_EDIT_REWARD_RESULT, RESULT_REWARD_DELETED
+                        )
+                        navController.popBackStack()
+                    }
+                }.exhaustive
+
+            }
+        }
+
+        AddEditRewardScreenContent(
+            isEditMode = isEditMode,
+            rewardNameInput = rewardNameInput,
+            chanceInput = chanceInput,
+            rewardIconSelection = rewardIconSelection,
+            actions = viewModel,
+            shouldShowRewardIconSelectedDialog = shouldShowRewardIconSelectedDialog,
+            hasRewardNameInputError = rewardNameInputError,
+            shouldShowRewardDeleteConfirmationDialog = shouldShowRewardDeleteConfirmationDialog,
+        )
     }
 }
 

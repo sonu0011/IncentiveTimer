@@ -7,99 +7,23 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.example.incentivetimer.R
-import com.example.incentivetimer.core.ui.composables.ITIconButton
 import com.example.incentivetimer.core.ui.IconKey
-import com.example.incentivetimer.core.ui.defaultRewardIcon
-import com.example.incentivetimer.core.util.exhaustive
+import com.example.incentivetimer.core.ui.composables.ITIconButton
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 
-
-interface AddEditRewardScreenActions {
-    fun onRewardNameInputChanged(input: String)
-    fun onChanceInputChanged(input: Int)
-    fun onSaveClicked()
-    fun onRewardIconButtonClicked()
-    fun onRewardIconDialogDismissRequest()
-    fun onIconSelected(iconKey: IconKey)
-    fun onDeleteRewardClicked()
-    fun onDeleteRewardConfirmed()
-    fun onDeleteRewardDialogDismiss()
-}
-
 @Composable
-fun AddEditRewardScreen(
-    navController: NavController,
-    viewModel: AddEditRewardVieModel = hiltViewModel()
-) {
-    val isEditMode = viewModel.isEditMode
-    val rewardNameInput by viewModel.rewardNameInput.observeAsState("")
-    val chanceInput by viewModel.chanceInput.observeAsState(10)
-    val shouldShowRewardIconSelectedDialog by
-    viewModel.showRewardIconSelectionDialog.observeAsState(false)
-
-    val shouldShowRewardDeleteConfirmationDialog by
-    viewModel.showRewardDeleteConfirmationDialog.observeAsState(false)
-
-    val rewardIconSelection by viewModel.rewardIconKey.observeAsState(defaultRewardIcon)
-    val rewardNameInputError by viewModel.rewardNameInputError.observeAsState(false)
-
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                AddEditRewardEvent.RewardCreated -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
-                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_ADDED
-                    )
-                    navController.popBackStack()
-                }
-                AddEditRewardEvent.RewardUpdated -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
-                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_UPDATED
-                    )
-                    navController.popBackStack()
-                }
-                AddEditRewardEvent.RewardDeleted -> {
-                    navController.previousBackStackEntry?.savedStateHandle?.set(
-                        ADD_EDIT_REWARD_RESULT, RESULT_REWARD_DELETED
-                    )
-                    navController.popBackStack()
-                }
-            }.exhaustive
-
-        }
-    }
-
-    ScreenContent(
-        isEditMode = isEditMode,
-        rewardNameInput = rewardNameInput,
-        chanceInput = chanceInput,
-        rewardIconSelection = rewardIconSelection,
-        actions = viewModel,
-        shouldShowRewardIconSelectedDialog = shouldShowRewardIconSelectedDialog,
-        hasRewardNameInputError = rewardNameInputError,
-        shouldShowRewardDeleteConfirmationDialog = shouldShowRewardDeleteConfirmationDialog,
-        onCloseClicked = { navController.popBackStack() },
-    )
-
-}
-
-@Composable
-private fun ScreenContent(
+fun AddEditRewardScreenContent(
     isEditMode: Boolean,
     rewardNameInput: String,
     chanceInput: Int,
     rewardIconSelection: IconKey,
-    onCloseClicked: () -> Unit,
     actions: AddEditRewardScreenActions,
     hasRewardNameInputError: Boolean,
     shouldShowRewardDeleteConfirmationDialog: Boolean,

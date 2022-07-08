@@ -13,83 +13,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.ui.IconKey
 import com.example.incentivetimer.core.ui.listBottomPadding
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
 import com.example.incentivetimer.data.Reward
-import com.example.incentivetimer.features.add_edit_reward.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun RewardListScreen(
-    navController: NavController,
-    viewModel: RewardListViewModel = hiltViewModel(),
-
-    ) {
-    val rewards by viewModel.rewards.observeAsState(listOf())
-    val scaffoldState = rememberScaffoldState()
-    val context = LocalContext.current
-
-    val addEditRewardResult = navController.currentBackStackEntry
-        ?.savedStateHandle?.getLiveData<String>(ADD_EDIT_REWARD_RESULT)
-        ?.observeAsState()
-
-    LaunchedEffect(key1 = addEditRewardResult) {
-        navController.currentBackStackEntry?.savedStateHandle?.remove<String>(
-            ADD_EDIT_REWARD_RESULT
-        )
-
-        addEditRewardResult?.value?.let { addEditRewardResult ->
-            when (addEditRewardResult) {
-                RESULT_REWARD_ADDED -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        context.getString(R.string.reward_added)
-                    )
-                }
-                RESULT_REWARD_UPDATED -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        context.getString(R.string.reward_updated)
-                    )
-                }
-                RESULT_REWARD_DELETED -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        context.getString(R.string.reward_deleted)
-                    )
-                }
-            }
-
-        }
-    }
-
-    ScreenContent(
-        scaffoldState = scaffoldState,
-        onAddNewRewardClicked = {
-            navController.navigate(AddEditRewardScreenSpec.buildRoute())
-        },
-        onRewardItemClicked = { id ->
-            navController.navigate(AddEditRewardScreenSpec.buildRoute(id))
-        },
-        rewardList = rewards
-    )
-}
-
-@Composable
-private fun ScreenContent(
+fun RewardListScreenContent(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     rewardList: List<Reward>,
     onAddNewRewardClicked: () -> Unit,
@@ -223,7 +163,7 @@ fun RewardListScreenTopBar() {
 fun DefaultPreview() {
     IncentiveTimerTheme {
         Surface() {
-            ScreenContent(
+            RewardListScreenContent(
                 onAddNewRewardClicked = {},
                 onRewardItemClicked = {},
                 rewardList = listOf()
