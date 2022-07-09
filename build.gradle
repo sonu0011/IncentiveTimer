@@ -6,6 +6,7 @@ buildscript {
         room_version = '2.4.2'
         flow_layout = '0.24.12-rc'
         timber = '5.0.1'
+        flow_combile = '1.1.1'
     }
     dependencies {
         classpath 'com.google.dagger:hilt-android-gradle-plugin:2.40.5'

@@ -29,4 +29,5 @@
     <string name="short_break">Short break</string>
     <string name="long_break">Long break</string>
     <string name="empty_string" />
+    <string name="reset_pomodoro_count">Reset pomodoro count</string>
 </resources>

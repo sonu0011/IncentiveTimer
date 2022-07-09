@@ -6,7 +6,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
 
 object TimeScreenSpec : ScreenSpec {
@@ -21,19 +20,11 @@ object TimeScreenSpec : ScreenSpec {
     @Composable
     override fun Content(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: TimerScreenViewModel = hiltViewModel(navBackStackEntry)
-        val timeLeftInMillis by viewModel.timeLeftInMillis.observeAsState(0L)
-        val timerRunning by viewModel.timerRunning.observeAsState(false)
-        val currentTimeTargetInMillis by viewModel.currentTimeTargetInMillis.observeAsState(0L)
-        val currentPhase by viewModel.currentPhase.observeAsState()
-        val pomodorosCompleted by viewModel.pomodorosCompleted.observeAsState(0)
+        val pomodoroTimerState by viewModel.pomodoroTimerState.observeAsState()
 
         TimerScreenContent(
-            timerRunning = timerRunning,
             actions = viewModel,
-            timeLeftInMillis = timeLeftInMillis,
-            currentTimeTargetInMillis = currentTimeTargetInMillis,
-            pomodorosCompleted =pomodorosCompleted,
-            currentPhase =currentPhase
+            pomodoroTimerState = pomodoroTimerState
         )
     }
 }

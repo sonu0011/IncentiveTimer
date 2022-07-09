@@ -94,6 +94,8 @@ dependencies {
     //timber
     implementation "com.jakewharton.timber:timber:$timber"
 
+    //Zhuinden flow-combine
+    implementation "com.github.Zhuinden:flow-combinetuple-kt:$flow_combile"
 
 
 }

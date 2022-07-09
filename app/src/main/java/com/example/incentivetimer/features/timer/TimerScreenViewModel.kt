@@ -10,19 +10,22 @@ class TimerScreenViewModel @Inject constructor(
     private val pomodoroTimeManager: PomodoroTimeManager
 ) : ViewModel(), TimerScreenActions {
 
-    val timeLeftInMillis = pomodoroTimeManager.timeLeftInMillis.asLiveData()
-    val timerRunning = pomodoroTimeManager.timerRunning.asLiveData()
-    val currentTimeTargetInMillis = pomodoroTimeManager.currentTimeTargetInMillis.asLiveData()
-    val currentPhase = pomodoroTimeManager.currentPhase.asLiveData()
-    val pomodorosCompleted = pomodoroTimeManager.pomodorosCompleted.asLiveData()
+    val pomodoroTimerState = pomodoroTimeManager.pomodoroTimerState.asLiveData()
 
     override fun onResetTimerClicked() {
+        pomodoroTimeManager.resetTimer()
     }
 
     override fun onResetPomodoroSetClicked() {
+        pomodoroTimeManager.resetPomodoroSet()
     }
 
     override fun startStopTimer() {
         pomodoroTimeManager.startStopTimer()
+    }
+
+    override fun onResetPomodoroCountClicked() {
+        pomodoroTimeManager.resetPomodoroCount()
+
     }
 }
