@@ -1,8 +1,11 @@
 package com.example.incentivetimer.features.timer
 
 import android.os.CountDownTimer
+import androidx.annotation.StringRes
+import com.example.incentivetimer.R
+import com.example.incentivetimer.core.notification.NotificationHelper
 import com.example.incentivetimer.di.ApplicationScope
-  import com.zhuinden.flowcombinetuplekt.combineTuple
+import com.zhuinden.flowcombinetuplekt.combineTuple
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +24,8 @@ data class PomodoroTimerState(
 
     )
 
-enum class PomodoroPhase {
-    POMODORO, SHORT_BREAK, LONG_BREAK
+enum class PomodoroPhase(@StringRes val readableName: Int) {
+    POMODORO(R.string.pomodoro), SHORT_BREAK(R.string.short_break), LONG_BREAK(R.string.long_break)
 }
 
 const val POMODORO_DURATION_IN_MILLS =/* 25 * 60 * 1_000L */ 10000L
@@ -32,7 +35,8 @@ private const val POMODOROS_PER_SET = 4
 
 @Singleton
 class PomodoroTimeManager @Inject constructor(
-    @ApplicationScope private val applicationScope: CoroutineScope,
+    private val timerServiceManager: TimerServiceManager,
+    private val notificationHelper: NotificationHelper
 ) {
     private val timerRunningFlow = MutableStateFlow(false)
     private val currentPhaseFlow = MutableStateFlow(PomodoroPhase.POMODORO)
@@ -65,9 +69,11 @@ class PomodoroTimeManager @Inject constructor(
     private var countDownTimer: CountDownTimer? = null
 
     fun startStopTimer() {
+        notificationHelper.removeTimerCompletedNotification()
         val timerRunning = timerRunningFlow.value
         if (timerRunning) {
             stopTimer()
+            timerServiceManager.stopTimerService()
         } else {
             startTimer()
         }
@@ -83,6 +89,7 @@ class PomodoroTimeManager @Inject constructor(
 
             override fun onFinish() {
                 val currentPhase = currentPhaseFlow.value
+                notificationHelper.showTimerCompletedNotification(currentPhase)
                 stopTimer()
                 if (currentPhase == PomodoroPhase.POMODORO) {
                     pomodorosCompletedTotalFlow.value++
@@ -92,6 +99,7 @@ class PomodoroTimeManager @Inject constructor(
             }
         }.start()
         timerRunningFlow.value = true
+        timerServiceManager.startTimerService()
     }
 
 

@@ -79,13 +79,8 @@ private fun Timer(
             modifier = Modifier.align(Alignment.Center)
         )
 
-
-        val phaseText = when (currentPhase) {
-            POMODORO -> stringResource(id = R.string.pomodoro).uppercase()
-            SHORT_BREAK -> stringResource(id = R.string.short_break).uppercase()
-            LONG_BREAK -> stringResource(id = R.string.long_break).uppercase()
-            null -> stringResource(id = R.string.empty_string)
-        }
+        val phaseText =
+            if (currentPhase != null) stringResource(currentPhase.readableName).uppercase() else ""
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
