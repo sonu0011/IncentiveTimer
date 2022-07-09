@@ -3,8 +3,6 @@ package com.example.incentivetimer.features.timer
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
-import com.example.incentivetimer.R
 import com.example.incentivetimer.core.notification.NotificationHelper
 import com.example.incentivetimer.core.notification.TIMER_SERVICE_NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint

@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.ui.composables.RoundedCornerCircularProgressBarIndicatorWithBackground
+import com.example.incentivetimer.core.ui.composables.SimpleConfirmationDialog
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
 import com.example.incentivetimer.core.ui.theme.PrimaryLightAlpha
 import com.example.incentivetimer.features.timer.PomodoroPhase.*
@@ -28,6 +29,9 @@ import com.example.incentivetimer.features.timer.PomodoroPhase.*
 @Composable
 fun TimerScreenContent(
     pomodoroTimerState: PomodoroTimerState?,
+    showResetTimerConfirmationDialog: Boolean,
+    showResetPomodoroSetConfirmationDialog: Boolean,
+    showResetPomodoroCountConfirmationDialog: Boolean,
     actions: TimerScreenActions,
 ) {
     val timerRunning = pomodoroTimerState?.timerRunning ?: false
@@ -44,6 +48,37 @@ fun TimerScreenContent(
             Spacer(modifier = Modifier.height(48.dp))
             TimerStartStopButton(timerRunning = timerRunning, actions = actions)
         }
+    }
+
+
+    if (showResetTimerConfirmationDialog) {
+        SimpleConfirmationDialog(
+            title = R.string.reset_timer,
+            text = R.string.reset_timer_confirmation_message,
+            confirmButtonText = R.string.reset_timer,
+            dismissAction = actions::onResetTimerDialogDismissed,
+            confirmAction = actions::onResetTimerConfirmed,
+        )
+    }
+
+    if (showResetPomodoroSetConfirmationDialog) {
+        SimpleConfirmationDialog(
+            title = R.string.reset_pomodoro_set,
+            text = R.string.reset_pomodoro_set_confirmation_message,
+            confirmButtonText = R.string.reset_pomodoro_set,
+            dismissAction = actions::onResetPomodoroSetDialogDismissed,
+            confirmAction = actions::onResetPomodoroSetConfirmed,
+        )
+    }
+
+    if (showResetPomodoroCountConfirmationDialog) {
+        SimpleConfirmationDialog(
+            title = R.string.reset_pomodoro_count,
+            text = R.string.reset_pomodoro_count_confirmation_message,
+            confirmButtonText = R.string.reset_pomodoro_count,
+            dismissAction = actions::onResetPomodoroCountDialogDismissed,
+            confirmAction = actions::onResetPomodoroCountConfirmed,
+        )
     }
 }
 
@@ -266,7 +301,16 @@ fun DefaultPreview() {
                     override fun onResetTimerClicked() {}
                     override fun onResetPomodoroSetClicked() {}
                     override fun onResetPomodoroCountClicked() {}
+                    override fun onResetTimerConfirmed() {}
+                    override fun onResetTimerDialogDismissed() {}
+                    override fun onResetPomodoroSetConfirmed() {}
+                    override fun onResetPomodoroSetDialogDismissed() {}
+                    override fun onResetPomodoroCountConfirmed() {}
+                    override fun onResetPomodoroCountDialogDismissed() {}
                 },
+                showResetPomodoroCountConfirmationDialog = true,
+                showResetPomodoroSetConfirmationDialog = true,
+                showResetTimerConfirmationDialog = true
             )
         }
     }
