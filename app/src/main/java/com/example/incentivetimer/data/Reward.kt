@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.incentivetimer.core.ui.IconKey
+import com.example.incentivetimer.core.ui.defaultRewardIcon
 import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "rewards")
@@ -14,4 +15,8 @@ data class Reward(
     val chanceInPercent: Int,
     val isUnlocked: Boolean = false,
     @PrimaryKey(autoGenerate = true) val id: Long = 0
-) : Parcelable
+) : Parcelable {
+    companion object {
+        val DEFAULT = Reward(defaultRewardIcon, "", 10)
+    }
+}

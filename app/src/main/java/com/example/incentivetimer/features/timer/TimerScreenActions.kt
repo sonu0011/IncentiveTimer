@@ -11,4 +11,7 @@ interface TimerScreenActions {
     fun onResetPomodoroCountClicked()
     fun onResetPomodoroCountConfirmed()
     fun onResetPomodoroCountDialogDismissed()
+    fun onSkipBreakClicked()
+    fun onSkipBreakConfirmed()
+    fun onSkipBreakDialogDismissed()
 }

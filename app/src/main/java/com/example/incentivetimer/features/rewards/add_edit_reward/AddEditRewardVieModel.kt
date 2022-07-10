@@ -1,6 +1,9 @@
 package com.example.incentivetimer.features.rewards.add_edit_reward
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.incentivetimer.core.ui.IconKey
 import com.example.incentivetimer.core.ui.defaultRewardIcon
 import com.example.incentivetimer.data.Reward
@@ -16,9 +19,10 @@ class AddEditRewardVieModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val rewardDao: RewardDao
 ) : ViewModel(), AddEditRewardScreenActions {
-    private var rewardLiveData = savedStateHandle.getLiveData<Reward>(
+    private var rewardLiveData = savedStateHandle.getLiveData(
         KEY_REWARD_LIVE_DATA,
-        Reward(defaultRewardIcon, "", 10)
+        Reward.DEFAULT
+
     )
     val rewardInput: LiveData<Reward> = rewardLiveData
 
@@ -108,7 +112,6 @@ class AddEditRewardVieModel @Inject constructor(
 
     override fun onRewardUnlockedCheckedChanged(unlocked: Boolean) {
         rewardLiveData.value = rewardLiveData.value?.copy(isUnlocked = unlocked)
-
     }
 
     private suspend fun updateReward(reward: Reward) {
@@ -129,6 +132,7 @@ class AddEditRewardVieModel @Inject constructor(
     }
 
     override fun onDeleteRewardConfirmed() {
+        showRewardDeleteConfirmationDialogLiveData.value = false
         val reward = rewardLiveData.value ?: return
         viewModelScope.launch {
             rewardDao.deleteReward(reward)

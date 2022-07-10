@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RewardDao {
 
-    @Query("SELECT * FROM REWARDS")
-    fun getAllRewards(): Flow<List<Reward>>
+    @Query("SELECT * FROM REWARDS order by isUnlocked DESC")
+    fun getAllRewardsSortedByIsUnlocked(): Flow<List<Reward>>
 
     @Query("SELECT * FROM REWARDS WHERE isUnlocked =0")
     fun getAllUnlockedRewards(): Flow<List<Reward>>
@@ -23,4 +23,7 @@ interface RewardDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReward(reward: Reward)
+
+    @Query("DELETE FROM rewards WHERE isUnlocked = 1")
+    suspend fun deleteAllUnlockedRewards()
 }

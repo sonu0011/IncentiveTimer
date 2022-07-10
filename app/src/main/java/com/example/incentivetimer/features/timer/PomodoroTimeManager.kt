@@ -26,7 +26,9 @@ data class PomodoroTimerState(
     )
 
 enum class PomodoroPhase(@StringRes val readableName: Int) {
-    POMODORO(R.string.pomodoro), SHORT_BREAK(R.string.short_break), LONG_BREAK(R.string.long_break)
+    POMODORO(R.string.pomodoro), SHORT_BREAK(R.string.short_break), LONG_BREAK(R.string.long_break);
+
+    val isBreak get() = this == SHORT_BREAK || this == LONG_BREAK
 }
 
 const val POMODORO_DURATION_IN_MILLS =/* 25 * 60 * 1_000L */ 10000L
@@ -97,10 +99,21 @@ class PomodoroTimeManager @Inject constructor(
                     rewardUnlockManager.rollAllRewards()
                 }
                 startNextPhase()
+                startTimer()
             }
         }.start()
         timerRunningFlow.value = true
         timerServiceManager.startTimerService()
+    }
+
+    fun skipBreak() {
+        if (currentPhaseFlow.value.isBreak) {
+            countDownTimer?.cancel()
+            startNextPhase()
+        }
+        if (timerRunningFlow.value) {
+            startTimer()
+        }
     }
 
 
@@ -116,7 +129,7 @@ class PomodoroTimeManager @Inject constructor(
         val pomodorosTarget = pomodorosPerSetTargetFlow.value
         pomodorosCompletedInsetFlow.value = pomodorosCompleted
         setPomodoroPhase(getNextPhase(pastPhase, pomodorosCompleted, pomodorosTarget))
-        startTimer()
+
     }
 
     private fun setPomodoroPhase(nextPhase: PomodoroPhase) {

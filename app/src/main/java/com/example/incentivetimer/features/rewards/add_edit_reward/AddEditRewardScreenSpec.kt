@@ -52,9 +52,7 @@ object AddEditRewardScreenSpec : ScreenSpec {
     override fun Content(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: AddEditRewardVieModel = hiltViewModel(navBackStackEntry)
         val isEditMode = viewModel.isEditMode
-        val rewardInput by viewModel.rewardInput.observeAsState(
-            viewModel.rewardInput.value!!
-        )
+        val rewardInput by viewModel.rewardInput.observeAsState(Reward.DEFAULT)
         val shouldShowRewardIconSelectedDialog by
         viewModel.showRewardIconSelectionDialog.observeAsState(false)
 

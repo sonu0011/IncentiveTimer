@@ -41,7 +41,12 @@
     <string name="break_over_message">Time to get back to work</string>
     <string name="timer_service_channel_desc">Shows a persistent notification when the promodoro timer is running</string>
     <string name="timer_completed_channel_name">Timer completed notification</string>
-    <string name="timer_completed_channel_desc">Shows a notificaiton when the countdown timer finishes</string>
+    <string name="timer_completed_channel_desc">Shows a notification when the countdown timer finishes</string>
     <string name="reward_unlocked">Reward unlocked</string>
     <string name="unlocked">Unlocked</string>
+    <string name="delete_all_unlocked_rewards">Delete all unlocked rewards</string>
+    <string name="delete_all_unlocked_rewards_confirmation_text">Do you really want to delete all unlocked rewards?</string>
+    <string name="skip_break">Skip break</string>
+    <string name="skip_break_confirmation_message">Do you want to skip this break?</string>
+
 </resources>

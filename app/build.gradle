@@ -48,6 +48,16 @@ android {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        freeCompilerArgs += ["-Xuse-experimental=androidx.compose.material.ExperimentalMaterialApi"]
+        freeCompilerArgs += ["-Xuse-experimental=androidx.compose.animation.ExperimentalAnimationApi"]
+        freeCompilerArgs += ["-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi"]
+        freeCompilerArgs += ["-Xuse-experimental=androidx.compose.foundation.ExperimentalFoundationApi"]
+        freeCompilerArgs += ["-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    }
+}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.7.0'

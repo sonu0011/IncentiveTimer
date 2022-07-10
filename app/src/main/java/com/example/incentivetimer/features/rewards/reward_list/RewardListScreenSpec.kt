@@ -18,14 +18,17 @@ object RewardListScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(navController: NavController, navBackStackEntry: NavBackStackEntry) {
-        RewardListScreenTopBar()
+        val viewModel: RewardListViewModel = hiltViewModel(navBackStackEntry)
+        RewardListScreenTopBar(actions = viewModel)
     }
 
     @Composable
     override fun Content(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: RewardListViewModel = hiltViewModel(navBackStackEntry)
-
         val rewards by viewModel.rewards.observeAsState(listOf())
+        val showDeleteAllUnlockedRewardsDialog by viewModel.showDeleteAllUnlockedRewardsDialog.observeAsState(
+            false
+        )
         val scaffoldState = rememberScaffoldState()
         val context = LocalContext.current
 
@@ -68,7 +71,9 @@ object RewardListScreenSpec : ScreenSpec {
             onRewardItemClicked = { id ->
                 navController.navigate(AddEditRewardScreenSpec.buildRoute(id))
             },
-            rewardList = rewards
+            rewardList = rewards,
+            actions = viewModel,
+            showDeleteAllUnlockedRewardsDialog = showDeleteAllUnlockedRewardsDialog
         )
     }
 }

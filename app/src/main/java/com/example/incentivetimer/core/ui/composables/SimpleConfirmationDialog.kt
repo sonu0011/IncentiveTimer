@@ -27,10 +27,7 @@ fun SimpleConfirmationDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    confirmAction()
-                    dismissAction()
-                }
+                onClick = confirmAction
             ) {
                 Text(stringResource(confirmButtonText))
             }

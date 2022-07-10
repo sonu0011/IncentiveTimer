@@ -32,6 +32,7 @@ fun TimerScreenContent(
     showResetTimerConfirmationDialog: Boolean,
     showResetPomodoroSetConfirmationDialog: Boolean,
     showResetPomodoroCountConfirmationDialog: Boolean,
+    showSkipConfirmationDialog: Boolean,
     actions: TimerScreenActions,
 ) {
     val timerRunning = pomodoroTimerState?.timerRunning ?: false
@@ -78,6 +79,16 @@ fun TimerScreenContent(
             confirmButtonText = R.string.reset_pomodoro_count,
             dismissAction = actions::onResetPomodoroCountDialogDismissed,
             confirmAction = actions::onResetPomodoroCountConfirmed,
+        )
+    }
+
+    if (showSkipConfirmationDialog) {
+        SimpleConfirmationDialog(
+            title = R.string.skip_break,
+            text = R.string.skip_break_confirmation_message,
+            confirmButtonText = R.string.skip_break,
+            dismissAction = actions::onSkipBreakDialogDismissed,
+            confirmAction = actions::onSkipBreakConfirmed,
         )
     }
 }
@@ -230,7 +241,8 @@ private fun TimerStartStopButton(
 
 @Composable
 fun TimerScreenTopBar(
-    actions: TimerScreenActions
+    actions: TimerScreenActions,
+    pomodoroTimerState: PomodoroTimerState?,
 ) {
     TopAppBar(
         title = {
@@ -255,6 +267,16 @@ fun TimerScreenTopBar(
                         }
                     ) {
                         Text(text = stringResource(id = R.string.reset_timer))
+                    }
+                    if (pomodoroTimerState?.currentPhase?.isBreak == true) {
+                        DropdownMenuItem(
+                            onClick = {
+                                expended = false
+                                actions.onSkipBreakClicked()
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.skip_break))
+                        }
                     }
                     DropdownMenuItem(
                         onClick = {
@@ -307,10 +329,14 @@ fun DefaultPreview() {
                     override fun onResetPomodoroSetDialogDismissed() {}
                     override fun onResetPomodoroCountConfirmed() {}
                     override fun onResetPomodoroCountDialogDismissed() {}
+                    override fun onSkipBreakClicked() {}
+                    override fun onSkipBreakConfirmed() {}
+                    override fun onSkipBreakDialogDismissed() {}
                 },
                 showResetPomodoroCountConfirmationDialog = true,
                 showResetPomodoroSetConfirmationDialog = true,
-                showResetTimerConfirmationDialog = true
+                showResetTimerConfirmationDialog = true,
+                showSkipConfirmationDialog = false
             )
         }
     }

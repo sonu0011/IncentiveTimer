@@ -21,7 +21,11 @@ object TimeScreenSpec : ScreenSpec {
     @Composable
     override fun TopBar(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: TimerScreenViewModel = hiltViewModel(navBackStackEntry)
-        TimerScreenTopBar(actions = viewModel)
+        val pomodoroTimerState by viewModel.pomodoroTimerState.observeAsState()
+        TimerScreenTopBar(
+            actions = viewModel,
+            pomodoroTimerState = pomodoroTimerState
+        )
     }
 
     @Composable
@@ -37,13 +41,15 @@ object TimeScreenSpec : ScreenSpec {
         val showResetPomodoroCountConfirmationDialog by viewModel.showResetPomodoroCountConfirmationDialog.observeAsState(
             false
         )
-        
+        val showSkipConfirmationDialog by viewModel.showSkipConfirmationDialog.observeAsState(false)
+
         TimerScreenContent(
             actions = viewModel,
             pomodoroTimerState = pomodoroTimerState,
             showResetTimerConfirmationDialog = showResetTimerConfirmationDialog,
             showResetPomodoroSetConfirmationDialog = showResetPomodoroSetConfirmationDialog,
-            showResetPomodoroCountConfirmationDialog = showResetPomodoroCountConfirmationDialog
+            showResetPomodoroCountConfirmationDialog = showResetPomodoroCountConfirmationDialog,
+            showSkipConfirmationDialog = showSkipConfirmationDialog,
         )
     }
 }

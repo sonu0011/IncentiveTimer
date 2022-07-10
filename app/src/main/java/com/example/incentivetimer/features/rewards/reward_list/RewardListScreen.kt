@@ -13,8 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.ui.IconKey
+import com.example.incentivetimer.core.ui.composables.SimpleConfirmationDialog
 import com.example.incentivetimer.core.ui.defaultRewardIcon
 import com.example.incentivetimer.core.ui.listBottomPadding
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
@@ -33,8 +34,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RewardListScreenContent(
+    showDeleteAllUnlockedRewardsDialog: Boolean,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     rewardList: List<Reward>,
+    actions: RewardListActions,
     onAddNewRewardClicked: () -> Unit,
     onRewardItemClicked: (Long) -> Unit,
 ) {
@@ -72,10 +75,14 @@ fun RewardListScreenContent(
                 state = listState,
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(rewardList) { reward ->
-                    RewardItem(reward = reward, onRewardItemClicked = { id ->
-                        onRewardItemClicked(id)
-                    })
+                items(rewardList, key = { it.id }) { reward ->
+                    RewardItem(
+                        reward = reward,
+                        onRewardItemClicked = { id ->
+                            onRewardItemClicked(id)
+                        },
+                        modifier = Modifier.animateItemPlacement()
+                    )
                 }
             }
 
@@ -104,17 +111,23 @@ fun RewardListScreenContent(
             }
         }
     }
+
+    if (showDeleteAllUnlockedRewardsDialog) {
+        SimpleConfirmationDialog(
+            title = R.string.delete_all_unlocked_rewards,
+            text = R.string.delete_all_unlocked_rewards_confirmation_text,
+            dismissAction = actions::onDeleteAllUnlockedRewardsDialogDismissed,
+            confirmAction = actions::onDeleteAllUnlockedRewardsConfirmed
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun RewardItem(
     reward: Reward,
     modifier: Modifier = Modifier,
     onRewardItemClicked: (Long) -> Unit,
-
-
-    ) {
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -155,12 +168,37 @@ private fun RewardItem(
 }
 
 @Composable
-fun RewardListScreenTopBar() {
+fun RewardListScreenTopBar(
+    actions: RewardListActions,
+) {
     TopAppBar(
         title = {
             Text(text = stringResource(id = R.string.reward_list))
+        },
+        actions = {
+
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.open_menu)
+                    )
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        actions.onDeleteAllUnlockedRewardsClicked()
+                    }) {
+                        Text(stringResource(R.string.delete_all_unlocked_rewards))
+                    }
+                }
+            }
         }
     )
+
 }
 
 @Preview(
@@ -181,7 +219,13 @@ fun DefaultPreview() {
             RewardListScreenContent(
                 onAddNewRewardClicked = {},
                 onRewardItemClicked = {},
-                rewardList = listOf()
+                rewardList = listOf(),
+                showDeleteAllUnlockedRewardsDialog = true,
+                actions = object : RewardListActions {
+                    override fun onDeleteAllUnlockedRewardsClicked() {}
+                    override fun onDeleteAllUnlockedRewardsConfirmed() {}
+                    override fun onDeleteAllUnlockedRewardsDialogDismissed() {}
+                }
             )
         }
     }

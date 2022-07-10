@@ -33,12 +33,18 @@ class TimerScreenViewModel @Inject constructor(
     val showResetPomodoroCountConfirmationDialog: LiveData<Boolean> =
         showResetPomodoroCountConfirmationDialogLiveData
 
+    private val showSkipBreakConfirmationDialogLiveData =
+        savedStateHandle.getLiveData("showSkipBreakConfirmationDialogLiveData", false)
+    val showSkipConfirmationDialog: LiveData<Boolean> =
+        showSkipBreakConfirmationDialogLiveData
+
 
     override fun onResetTimerClicked() {
         showResetTimerConfirmationDialogLiveData.value = true
     }
 
     override fun onResetTimerConfirmed() {
+        showResetTimerConfirmationDialogLiveData.value = false
         pomodoroTimeManager.resetTimer()
     }
 
@@ -51,6 +57,7 @@ class TimerScreenViewModel @Inject constructor(
     }
 
     override fun onResetPomodoroSetConfirmed() {
+        showResetPomodoroSetConfirmationDialogLiveData.value = false
         pomodoroTimeManager.resetPomodoroSet()
     }
 
@@ -67,10 +74,25 @@ class TimerScreenViewModel @Inject constructor(
     }
 
     override fun onResetPomodoroCountConfirmed() {
+        showResetPomodoroCountConfirmationDialogLiveData.value = false
         pomodoroTimeManager.resetPomodoroCount()
     }
 
     override fun onResetPomodoroCountDialogDismissed() {
         showResetPomodoroCountConfirmationDialogLiveData.value = false
+    }
+
+    override fun onSkipBreakClicked() {
+        showSkipBreakConfirmationDialogLiveData.value = true
+    }
+
+    override fun onSkipBreakConfirmed() {
+        showSkipBreakConfirmationDialogLiveData.value = false
+        pomodoroTimeManager.skipBreak()
+    }
+
+    override fun onSkipBreakDialogDismissed() {
+        showSkipBreakConfirmationDialogLiveData.value = false
+
     }
 }
