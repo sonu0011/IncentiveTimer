@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import com.example.incentivetimer.R
 import com.example.incentivetimer.application.ITActivity
+import com.example.incentivetimer.data.Reward
 import com.example.incentivetimer.features.timer.PomodoroPhase
 import com.example.incentivetimer.features.timer.PomodoroTimerState
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 class NotificationHelper @Inject constructor(
     @ApplicationContext private val applicationContext: Context
 ) {
+    // TODO: navigation is not working with launch mode as single top
     private var notificationManager = NotificationManagerCompat.from(applicationContext)
     private val mutabilityFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -34,6 +36,22 @@ class NotificationHelper @Inject constructor(
             ITActivity::class.java
         )
 
+    private val openRewardListIntent =
+        Intent(
+            Intent.ACTION_VIEW,
+            "https://www.incentivetimer.com/reward_list".toUri(),
+            applicationContext,
+            ITActivity::class.java
+        )
+    private val openRewardListPendingIntent =
+        PendingIntent.getActivity(
+            applicationContext,
+            0,
+            openRewardListIntent,
+            mutabilityFlag
+        )
+
+
     private val openTimerPendingIntent =
         PendingIntent.getActivity(
             applicationContext,
@@ -47,7 +65,7 @@ class NotificationHelper @Inject constructor(
     }
 
     fun getBaseTimerServiceNotification() =
-        NotificationCompat.Builder(applicationContext, TIMER_SERVICE_CHANNEL_ID)
+        NotificationCompat.Builder(applicationContext, TIMER_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_timer)
             .setSilent(true)
             .setContentIntent(openTimerPendingIntent)
@@ -72,8 +90,21 @@ class NotificationHelper @Inject constructor(
                 .setContentTitle(applicationContext.getString(title))
                 .setContentText(applicationContext.getString(text))
                 .setSmallIcon(R.drawable.ic_timer)
+                .setAutoCancel(true)
                 .build()
         notificationManager.notify(TIMER_COMPLETED_NOTIFICATION_ID, timerCompletionNotification)
+    }
+
+    fun showNotificationWhenRewardIsUnlocked(reward: Reward) {
+        val rewardUnlockedNotification =
+            NotificationCompat.Builder(applicationContext, TIMER_COMPLETED_NOTIFICATION_CHANNEL_ID)
+                .setContentTitle(applicationContext.getString(R.string.reward_unlocked))
+                .setContentText(reward.name)
+                .setSmallIcon(R.drawable.ic_star)
+                .setContentIntent(openRewardListPendingIntent)
+                .setAutoCancel(true)
+                .build()
+        notificationManager.notify(reward.id.toInt(), rewardUnlockedNotification)
     }
 
     fun updateTimerNotification(timerState: PomodoroTimerState) {
@@ -95,7 +126,7 @@ class NotificationHelper @Inject constructor(
     private fun createNotificationChannels() {
 
         val timerServiceChannel = NotificationChannelCompat.Builder(
-            TIMER_SERVICE_CHANNEL_ID,
+            TIMER_SERVICE_NOTIFICATION_CHANNEL_ID,
             NotificationManagerCompat.IMPORTANCE_DEFAULT
         )
             .setName(applicationContext.getString(R.string.timer_service_channel_name))
@@ -111,10 +142,19 @@ class NotificationHelper @Inject constructor(
             .setDescription(applicationContext.getString(R.string.timer_completed_channel_desc))
             .build()
 
+        val rewardUnlockedChannel = NotificationChannelCompat.Builder(
+            REWARD_UNLOCKED_NOTIFICATION_CHANNEL_ID,
+            NotificationManagerCompat.IMPORTANCE_HIGH
+        )
+            .setName(applicationContext.getString(R.string.reward_unlocked_channel_name))
+            .setDescription(applicationContext.getString(R.string.reward_unlocked_channel_desc))
+            .build()
+
         notificationManager.createNotificationChannelsCompat(
             listOf(
                 timerServiceChannel,
-                timerCompletedChannel
+                timerCompletedChannel,
+                rewardUnlockedChannel
             )
         )
     }
@@ -122,7 +162,8 @@ class NotificationHelper @Inject constructor(
 
 }
 
-private const val TIMER_SERVICE_CHANNEL_ID = "timer_service_channel"
+private const val TIMER_SERVICE_NOTIFICATION_CHANNEL_ID = "timer_service_notification_channel"
 private const val TIMER_COMPLETED_NOTIFICATION_CHANNEL_ID = "timer_completed_notification_channel"
-const val TIMER_SERVICE_NOTIFICATION_ID = 123
-private const val TIMER_COMPLETED_NOTIFICATION_ID = 124
+private const val REWARD_UNLOCKED_NOTIFICATION_CHANNEL_ID = "reward_unlocked_notification_channel"
+const val TIMER_SERVICE_NOTIFICATION_ID = -1
+private const val TIMER_COMPLETED_NOTIFICATION_ID = -2
