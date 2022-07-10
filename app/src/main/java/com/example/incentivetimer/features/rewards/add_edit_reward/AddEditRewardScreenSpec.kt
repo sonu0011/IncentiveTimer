@@ -1,4 +1,4 @@
-package com.example.incentivetimer.features.add_edit_reward
+package com.example.incentivetimer.features.rewards.add_edit_reward
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +11,7 @@ import com.example.incentivetimer.application.ARG_HIDE_BOTTOM_BAR
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
 import com.example.incentivetimer.core.ui.defaultRewardIcon
 import com.example.incentivetimer.core.util.exhaustive
+import com.example.incentivetimer.data.Reward
 
 object AddEditRewardScreenSpec : ScreenSpec {
     override val navHostRoute: String = "add_edit_screen?$ARG_REWARD_ID={$ARG_REWARD_ID}"
@@ -51,15 +52,17 @@ object AddEditRewardScreenSpec : ScreenSpec {
     override fun Content(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: AddEditRewardVieModel = hiltViewModel(navBackStackEntry)
         val isEditMode = viewModel.isEditMode
-        val rewardNameInput by viewModel.rewardNameInput.observeAsState("")
-        val chanceInput by viewModel.chanceInput.observeAsState(10)
+        val rewardInput by viewModel.rewardInput.observeAsState(
+            viewModel.rewardInput.value!!
+        )
         val shouldShowRewardIconSelectedDialog by
         viewModel.showRewardIconSelectionDialog.observeAsState(false)
 
+        val unlockedStateCheckBoxVisible by
+        viewModel.unlockedStateCheckBoxVisible.observeAsState(false)
+
         val shouldShowRewardDeleteConfirmationDialog by
         viewModel.showRewardDeleteConfirmationDialog.observeAsState(false)
-
-        val rewardIconSelection by viewModel.rewardIconKey.observeAsState(defaultRewardIcon)
         val rewardNameInputError by viewModel.rewardNameInputError.observeAsState(false)
 
         LaunchedEffect(Unit) {
@@ -90,10 +93,9 @@ object AddEditRewardScreenSpec : ScreenSpec {
 
         AddEditRewardScreenContent(
             isEditMode = isEditMode,
-            rewardNameInput = rewardNameInput,
-            chanceInput = chanceInput,
-            rewardIconSelection = rewardIconSelection,
+            rewardInput = rewardInput,
             actions = viewModel,
+            unlockedStateCheckBoxVisible = unlockedStateCheckBoxVisible,
             shouldShowRewardIconSelectedDialog = shouldShowRewardIconSelectedDialog,
             hasRewardNameInputError = rewardNameInputError,
             shouldShowRewardDeleteConfirmationDialog = shouldShowRewardDeleteConfirmationDialog,

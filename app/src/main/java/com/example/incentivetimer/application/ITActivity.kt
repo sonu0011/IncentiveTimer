@@ -26,8 +26,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
 import com.example.incentivetimer.core.ui.theme.IncentiveTimerTheme
-import com.example.incentivetimer.features.add_edit_reward.AddEditRewardScreenSpec
-import com.example.incentivetimer.features.reward_list.RewardListScreenSpec
+import com.example.incentivetimer.features.rewards.add_edit_reward.AddEditRewardScreenSpec
+import com.example.incentivetimer.features.rewards.reward_list.RewardListScreenSpec
 import com.example.incentivetimer.features.timer.TimeScreenSpec
 import dagger.hilt.android.AndroidEntryPoint
 

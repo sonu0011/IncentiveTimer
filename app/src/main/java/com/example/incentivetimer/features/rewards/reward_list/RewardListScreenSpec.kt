@@ -1,4 +1,4 @@
-package com.example.incentivetimer.features.reward_list
+package com.example.incentivetimer.features.rewards.reward_list
 
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -11,7 +11,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
-import com.example.incentivetimer.features.add_edit_reward.*
+import com.example.incentivetimer.features.rewards.add_edit_reward.*
 
 object RewardListScreenSpec : ScreenSpec {
     override val navHostRoute: String = "reward_list"

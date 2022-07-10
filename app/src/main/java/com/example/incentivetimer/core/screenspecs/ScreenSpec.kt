@@ -1,14 +1,12 @@
 package com.example.incentivetimer.core.screenspecs
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
-import com.example.incentivetimer.R
-import com.example.incentivetimer.features.add_edit_reward.AddEditRewardScreenSpec
-import com.example.incentivetimer.features.reward_list.RewardListScreenSpec
+import com.example.incentivetimer.features.rewards.add_edit_reward.AddEditRewardScreenSpec
+import com.example.incentivetimer.features.rewards.reward_list.RewardListScreenSpec
 import com.example.incentivetimer.features.timer.TimeScreenSpec
 
 interface ScreenSpec {

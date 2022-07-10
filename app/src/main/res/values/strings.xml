@@ -42,4 +42,6 @@
     <string name="timer_service_channel_desc">Shows a persistent notification when the promodoro timer is running</string>
     <string name="timer_completed_channel_name">Timer completed notification</string>
     <string name="timer_completed_channel_desc">Shows a notificaiton when the countdown timer finishes</string>
+    <string name="reward_unlocked">Reward unlocked</string>
+    <string name="unlocked">Unlocked</string>
 </resources>

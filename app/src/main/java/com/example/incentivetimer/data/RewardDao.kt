@@ -9,8 +9,11 @@ interface RewardDao {
     @Query("SELECT * FROM REWARDS")
     fun getAllRewards(): Flow<List<Reward>>
 
+    @Query("SELECT * FROM REWARDS WHERE isUnlocked =0")
+    fun getAllUnlockedRewards(): Flow<List<Reward>>
+
     @Query("SELECT * FROM REWARDS WHERE id = :rewardId")
-    suspend fun getRewardById(rewardId: Long): Reward?
+    fun getRewardById(rewardId: Long?): Flow<Reward?>
 
     @Delete
     suspend fun deleteReward(reward: Reward)

@@ -1,4 +1,4 @@
-package com.example.incentivetimer.features.add_edit_reward
+package com.example.incentivetimer.features.rewards.add_edit_reward
 
 import com.example.incentivetimer.core.ui.IconKey
 
@@ -12,4 +12,5 @@ interface AddEditRewardScreenActions {
     fun onDeleteRewardClicked()
     fun onDeleteRewardConfirmed()
     fun onDeleteRewardDialogDismiss()
+    fun onRewardUnlockedCheckedChanged(unlocked: Boolean)
 }
