@@ -1,5 +1,6 @@
 package com.example.incentivetimer.application
 
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -30,9 +32,14 @@ import com.example.incentivetimer.features.rewards.add_edit_reward.AddEditReward
 import com.example.incentivetimer.features.rewards.reward_list.RewardListScreenSpec
 import com.example.incentivetimer.features.timer.TimeScreenSpec
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.flow.receiveAsFlow
 
 @AndroidEntryPoint
 class ITActivity : ComponentActivity() {
+    private val deepLinkChannel = Channel<Intent?>(UNLIMITED)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -41,76 +48,104 @@ class ITActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-private fun ScreenContent() {
-    val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-    val currentDestination = navBackStackEntry?.destination
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        deepLinkChannel.trySend(intent)
+    }
 
-    val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
+    @Composable
+    private fun ScreenContent() {
+        val navController = rememberNavController()
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
+        val currentDestination = navBackStackEntry?.destination
 
-
-    Scaffold(
-        topBar = {
-            val navBackStackEntry = navBackStackEntry
-            if (navBackStackEntry != null) {
-                screenSpec?.TopBar(
-                    navController = navController,
-                    navBackStackEntry = navBackStackEntry
-                )
+        val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
+        LaunchedEffect(Unit) {
+            deepLinkChannel.receiveAsFlow().collect { intent ->
+                navController.handleDeepLink(intent)
             }
-        },
-        bottomBar = {
-            if (hideBottomBar == null || !hideBottomBar) {
-                BottomNavigation {
-                    bottomNavDestinations.forEach { bottomNavDestination ->
-                        BottomNavigationItem(
-                            selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.screenSpec.navHostRoute } == true,
-                            onClick = {
-                                navController.navigate(bottomNavDestination.screenSpec.navHostRoute) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+        }
+        Scaffold(
+            topBar = {
+                val navBackStackEntry = navBackStackEntry
+                if (navBackStackEntry != null) {
+                    screenSpec?.TopBar(
+                        navController = navController,
+                        navBackStackEntry = navBackStackEntry
+                    )
+                }
+            },
+            bottomBar = {
+                if (hideBottomBar == null || !hideBottomBar) {
+                    BottomNavigation {
+                        bottomNavDestinations.forEach { bottomNavDestination ->
+                            BottomNavigationItem(
+                                selected = currentDestination?.hierarchy?.any { it.route == bottomNavDestination.screenSpec.navHostRoute } == true,
+                                onClick = {
+                                    navController.navigate(bottomNavDestination.screenSpec.navHostRoute) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            label = { Text(text = stringResource(id = bottomNavDestination.label)) },
-                            icon = {
-                                Icon(
-                                    bottomNavDestination.icon,
-                                    contentDescription = null
-                                )
-                            },
+                                },
+                                label = { Text(text = stringResource(id = bottomNavDestination.label)) },
+                                icon = {
+                                    Icon(
+                                        bottomNavDestination.icon,
+                                        contentDescription = null
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
+            NavHost(
+                modifier = Modifier.padding(innerPadding),
+                navController = navController,
+                startDestination = bottomNavDestinations[0].screenSpec.navHostRoute
+            ) {
+                ScreenSpec.allScreens.values.forEach { screenSpec ->
+                    composable(
+                        route = screenSpec.navHostRoute,
+                        arguments = screenSpec.arguments,
+                        deepLinks = screenSpec.deepLinks
+                    ) { navBackStackEntry ->
+                        screenSpec.Content(
+                            navController = navController,
+                            navBackStackEntry = navBackStackEntry
                         )
                     }
                 }
             }
         }
-    ) { innerPadding ->
-        NavHost(
-            modifier = Modifier.padding(innerPadding),
-            navController = navController,
-            startDestination = bottomNavDestinations[0].screenSpec.navHostRoute
-        ) {
-            ScreenSpec.allScreens.values.forEach { screenSpec ->
-                composable(
-                    route = screenSpec.navHostRoute,
-                    arguments = screenSpec.arguments,
-                    deepLinks = screenSpec.deepLinks
-                ) { navBackStackEntry ->
-                    screenSpec.Content(
-                        navController = navController,
-                        navBackStackEntry = navBackStackEntry
-                    )
-                }
+    }
+
+    @Preview(
+        name = "Light Mode",
+        uiMode = UI_MODE_NIGHT_NO
+    )
+
+    @Preview(
+        showBackground = true,
+        name = "Dark Mode",
+        uiMode = UI_MODE_NIGHT_YES
+    )
+    @Composable
+    fun DefaultPreview() {
+        IncentiveTimerTheme {
+            Surface() {
+                ScreenContent()
             }
         }
     }
 }
+
 
 val bottomNavDestinations = listOf(
     BottomNavDestination.Timer,
@@ -143,23 +178,5 @@ sealed class FullDestinations(
     object AddEditRewardScreen : FullDestinations(screenSpec = AddEditRewardScreenSpec)
 }
 
-@Preview(
-    name = "Light Mode",
-    uiMode = UI_MODE_NIGHT_NO
-)
-
-@Preview(
-    showBackground = true,
-    name = "Dark Mode",
-    uiMode = UI_MODE_NIGHT_YES
-)
-@Composable
-fun DefaultPreview() {
-    IncentiveTimerTheme {
-        Surface() {
-            ScreenContent()
-        }
-    }
-}
 
 const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"

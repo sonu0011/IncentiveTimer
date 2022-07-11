@@ -76,13 +76,37 @@ fun RewardListScreenContent(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(rewardList, key = { it.id }) { reward ->
-                    RewardItem(
-                        reward = reward,
-                        onRewardItemClicked = { id ->
-                            onRewardItemClicked(id)
-                        },
-                        modifier = Modifier.animateItemPlacement()
-                    )
+                    if (reward.isUnlocked) {
+                        val dismissState =
+                            rememberDismissState(confirmStateChange = { dismissValue ->
+                                if (dismissValue == DismissValue.DismissedToStart || dismissValue == DismissValue.DismissedToEnd) {
+                                    actions.onRewardSwiped(reward)
+                                }
+                                true
+                            })
+
+                        SwipeToDismiss(
+                            state = dismissState,
+                            background = {},
+                            modifier = Modifier.animateItemPlacement()
+                        ) {
+                            RewardItem(
+                                reward = reward,
+                                onRewardItemClicked = { id ->
+                                    onRewardItemClicked(id)
+                                }
+                            )
+                        }
+                    } else {
+                        RewardItem(
+                            reward = reward,
+                            onRewardItemClicked = { id ->
+                                onRewardItemClicked(id)
+                            },
+                            modifier = Modifier.animateItemPlacement()
+                        )
+                    }
+
                 }
             }
 
@@ -225,6 +249,8 @@ fun DefaultPreview() {
                     override fun onDeleteAllUnlockedRewardsClicked() {}
                     override fun onDeleteAllUnlockedRewardsConfirmed() {}
                     override fun onDeleteAllUnlockedRewardsDialogDismissed() {}
+                    override fun onRewardSwiped(reward: Reward) {}
+                    override fun onUndoDeleteRewardConfirmed(reward: Reward) {}
                 }
             )
         }

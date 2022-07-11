@@ -1,8 +1,10 @@
 package com.example.incentivetimer.features.rewards.reward_list
 
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
@@ -13,7 +15,9 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
+import com.example.incentivetimer.core.util.exhaustive
 import com.example.incentivetimer.features.rewards.add_edit_reward.*
+import kotlinx.coroutines.flow.collect
 
 object RewardListScreenSpec : ScreenSpec {
     override val navHostRoute: String = "reward_list"
@@ -68,6 +72,22 @@ object RewardListScreenSpec : ScreenSpec {
                     }
                 }
 
+            }
+        }
+        LaunchedEffect(Unit) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is RewardListViewModel.Event.ShowUndoRewardSnackBar -> {
+                        val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                            message = context.getString(R.string.reward_deleted),
+                            actionLabel = context.getString(R.string.undo)
+                        )
+                        if (snackbarResult == SnackbarResult.ActionPerformed) {
+                            viewModel.onUndoDeleteRewardConfirmed(event.reward)
+                        }
+                        Unit
+                    }
+                }.exhaustive
             }
         }
 
