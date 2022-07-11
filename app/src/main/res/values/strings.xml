@@ -48,8 +48,13 @@
     <string name="delete_all_unlocked_rewards_confirmation_text">Do you really want to delete all unlocked rewards?</string>
     <string name="skip_break">Skip break</string>
     <string name="skip_break_confirmation_message">Do you want to skip this break?</string>
-    <string name="reward_unlocked_channel_name">Reward unlocked notificaiton</string>
+    <string name="reward_unlocked_channel_name">Reward unlocked notification</string>
     <string name="reward_unlocked_channel_desc">Shows a notification when the reward is unlocked</string>
-    <string name="undo">Undo</string>
+    <string name="undo">Undo</string><string name="selected_placeholder">%d selected</string>
+    <string name="delete_all_selected_items">Delete all selected items</string>
+    <string name="delete_rewards">Delete rewards</string>
+    <string name="delete_all_selected_rewards_confirmation_text">Do you really want to delete all selected rewards?</string>
+
+
 
 </resources>

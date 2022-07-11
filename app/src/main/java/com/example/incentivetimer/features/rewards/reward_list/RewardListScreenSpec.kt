@@ -4,7 +4,6 @@ import androidx.compose.material.SnackbarResult
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
@@ -17,7 +16,6 @@ import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
 import com.example.incentivetimer.core.util.exhaustive
 import com.example.incentivetimer.features.rewards.add_edit_reward.*
-import kotlinx.coroutines.flow.collect
 
 object RewardListScreenSpec : ScreenSpec {
     override val navHostRoute: String = "reward_list"
@@ -31,7 +29,17 @@ object RewardListScreenSpec : ScreenSpec {
     @Composable
     override fun TopBar(navController: NavController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: RewardListViewModel = hiltViewModel(navBackStackEntry)
-        RewardListScreenTopBar(actions = viewModel)
+        val multipleSelectionModeActive by viewModel.multipleSelectionModeActive.observeAsState(
+            false
+        )
+        val selectedItemCount by viewModel.selectedItemCount.observeAsState(0)
+
+        RewardListScreenTopBar(
+            actions = viewModel,
+            multiSelectionModeActive = multipleSelectionModeActive,
+            selectedItemCount = selectedItemCount
+
+        )
     }
 
     @Composable
@@ -43,6 +51,9 @@ object RewardListScreenSpec : ScreenSpec {
         )
         val scaffoldState = rememberScaffoldState()
         val context = LocalContext.current
+
+        val showDeleteAllSelectedRewardsDialog by viewModel.showDeleteAllSelectedRewardsDialog.observeAsState(false)
+        val selectedRewards by viewModel.selectedRewards.observeAsState(listOf())
 
         val addEditRewardResult = navController.currentBackStackEntry
             ?.savedStateHandle?.getLiveData<String>(ADD_EDIT_REWARD_RESULT)
@@ -87,17 +98,19 @@ object RewardListScreenSpec : ScreenSpec {
                         }
                         Unit
                     }
+                    is RewardListViewModel.Event.NavigateToAddEditRewardScreen -> {
+                        navController.navigate(AddEditRewardScreenSpec.buildRoute(event.reward.id))
+                    }
                 }.exhaustive
             }
         }
 
         RewardListScreenContent(
             scaffoldState = scaffoldState,
+            showDeleteAllSelectedRewardsDialog = showDeleteAllSelectedRewardsDialog,
+            selectedRewards = selectedRewards,
             onAddNewRewardClicked = {
                 navController.navigate(AddEditRewardScreenSpec.buildRoute())
-            },
-            onRewardItemClicked = { id ->
-                navController.navigate(AddEditRewardScreenSpec.buildRoute(id))
             },
             rewardList = rewards,
             actions = viewModel,

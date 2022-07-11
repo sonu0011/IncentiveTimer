@@ -24,6 +24,9 @@ interface RewardDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReward(reward: Reward)
 
+    @Delete
+    suspend fun deleteRewards(rewards: List<Reward>)
+
     @Query("DELETE FROM rewards WHERE isUnlocked = 1")
     suspend fun deleteAllUnlockedRewards()
 }
