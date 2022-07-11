@@ -6,6 +6,8 @@ import com.example.incentivetimer.data.RewardDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,6 +29,10 @@ class RewardListViewModel @Inject constructor(
         rewardsFlow
     ) { selectedRewards, rewards ->
         selectedRewards.filter { rewards.contains(it) }
+    }.onEach { selectedRewards ->
+        if (selectedRewards.isEmpty()) {
+            cancelMultiSelectionMode()
+        }
     }.asLiveData()
 
     val selectedItemCount = selectedRewards.map { it.size }

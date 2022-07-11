@@ -16,6 +16,8 @@ import com.example.incentivetimer.R
 import com.example.incentivetimer.core.screenspecs.ScreenSpec
 import com.example.incentivetimer.core.util.exhaustive
 import com.example.incentivetimer.features.rewards.add_edit_reward.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 object RewardListScreenSpec : ScreenSpec {
     override val navHostRoute: String = "reward_list"
@@ -52,7 +54,9 @@ object RewardListScreenSpec : ScreenSpec {
         val scaffoldState = rememberScaffoldState()
         val context = LocalContext.current
 
-        val showDeleteAllSelectedRewardsDialog by viewModel.showDeleteAllSelectedRewardsDialog.observeAsState(false)
+        val showDeleteAllSelectedRewardsDialog by viewModel.showDeleteAllSelectedRewardsDialog.observeAsState(
+            false
+        )
         val selectedRewards by viewModel.selectedRewards.observeAsState(listOf())
 
         val addEditRewardResult = navController.currentBackStackEntry
@@ -86,9 +90,10 @@ object RewardListScreenSpec : ScreenSpec {
             }
         }
         LaunchedEffect(Unit) {
-            viewModel.events.collect { event ->
+            viewModel.events.collectLatest { event ->
                 when (event) {
                     is RewardListViewModel.Event.ShowUndoRewardSnackBar -> {
+
                         val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
                             message = context.getString(R.string.reward_deleted),
                             actionLabel = context.getString(R.string.undo)
