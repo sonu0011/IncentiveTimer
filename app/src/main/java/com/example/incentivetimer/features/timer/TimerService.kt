@@ -22,6 +22,7 @@ class TimerService : Service() {
     @Inject
     lateinit var notificationHelper: NotificationHelper
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         startForeground(
             TIMER_SERVICE_NOTIFICATION_ID,
             notificationHelper.getBaseTimerServiceNotification().build()
@@ -29,7 +30,11 @@ class TimerService : Service() {
 
         serviceScope.launch {
             pomodoroTimerManager.pomodoroTimerState.collect { timerState ->
-                notificationHelper.updateTimerNotification(timerState)
+                notificationHelper.updateTimerServiceNotification(
+                    currentPhase = timerState.currentPhase,
+                    timeLeftInMillis = timerState.timeLeftInMillis,
+                    timerRunning = timerState.timerRunning
+                )
             }
         }
         return START_STICKY
@@ -44,4 +49,3 @@ class TimerService : Service() {
     override fun onBind(p0: Intent?): IBinder? = null
 
 }
-

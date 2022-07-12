@@ -12,7 +12,6 @@ import com.example.incentivetimer.R
 import com.example.incentivetimer.application.ITActivity
 import com.example.incentivetimer.data.Reward
 import com.example.incentivetimer.features.timer.PomodoroPhase
-import com.example.incentivetimer.features.timer.PomodoroTimerState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +22,7 @@ class NotificationHelper @Inject constructor(
 ) {
     // TODO: navigation is not working with launch mode as single top
     private var notificationManager = NotificationManagerCompat.from(applicationContext)
-    private val mutabilityFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    private val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     } else {
         PendingIntent.FLAG_UPDATE_CURRENT
@@ -48,7 +47,7 @@ class NotificationHelper @Inject constructor(
             applicationContext,
             0,
             openRewardListIntent,
-            mutabilityFlag
+            pendingIntentFlags
         )
 
 
@@ -57,7 +56,7 @@ class NotificationHelper @Inject constructor(
             applicationContext,
             0,
             openTimerIntent,
-            mutabilityFlag
+            pendingIntentFlags
         )
 
     init {
@@ -107,13 +106,69 @@ class NotificationHelper @Inject constructor(
         notificationManager.notify(reward.id.toInt(), rewardUnlockedNotification)
     }
 
-    fun updateTimerNotification(timerState: PomodoroTimerState) {
+    fun updateTimerServiceNotification(
+        timerRunning: Boolean,
+        currentPhase: PomodoroPhase,
+        timeLeftInMillis: Long
+    ) {
+        val actionIntent =
+            getTimerNotificationActionBroadcast(timerRunning, currentPhase, timeLeftInMillis)
+
         val notificationUpdate = getBaseTimerServiceNotification()
-            .setContentTitle(applicationContext.getString(timerState.currentPhase.readableName))
-            .setContentText(timerState.timeLeftInMillis.toString())
+            .setContentTitle(applicationContext.getString(currentPhase.readableName))
+            .setContentText(timeLeftInMillis.toString())
+            .addAction(
+                R.drawable.ic_pause,
+                applicationContext.getString(R.string.pause),
+                actionIntent
+            )
             .build()
         notificationManager.notify(TIMER_SERVICE_NOTIFICATION_ID, notificationUpdate)
     }
+
+
+    fun showResumeTimerNotification(
+        timerRunning: Boolean,
+        currentPhase: PomodoroPhase,
+        timeLeftInMillis: Long
+    ) {
+        val actionIntent =
+            getTimerNotificationActionBroadcast(timerRunning, currentPhase, timeLeftInMillis)
+
+        val title = applicationContext.getString(currentPhase.readableName) +
+                " (" + applicationContext.getString(R.string.paused) + ")"
+
+        val notificationUpdate = getBaseTimerServiceNotification()
+            .setContentTitle(title)
+            .setContentText(timeLeftInMillis.toString())
+            .addAction(
+                R.drawable.ic_resume,
+                applicationContext.getString(R.string.resume),
+                actionIntent
+            )
+            .build()
+        notificationManager.notify(TIMER_RESUME_NOTIFICATION_ID, notificationUpdate)
+    }
+
+    private fun getTimerNotificationActionBroadcast(
+        timerRunning: Boolean,
+        currentPhase: PomodoroPhase,
+        timeLeftInMillis: Long
+    ): PendingIntent {
+        val broadcastIntent =
+            Intent(applicationContext, TimerNotificationBroadcastReceiver::class.java).apply {
+                putExtra(EXTRA_TIMER_RUNNING, timerRunning)
+                putExtra(EXTRA_POMODORO_PHASE, currentPhase)
+                putExtra(EXTRA_TIME_LEFT_IN_MILLIS, timeLeftInMillis)
+            }
+        return PendingIntent.getBroadcast(
+            applicationContext,
+            0,
+            broadcastIntent,
+            pendingIntentFlags
+        )
+    }
+
 
     fun removeTimerNotification() {
         notificationManager.cancel(TIMER_SERVICE_NOTIFICATION_ID)
@@ -121,6 +176,10 @@ class NotificationHelper @Inject constructor(
 
     fun removeTimerCompletedNotification() {
         notificationManager.cancel(TIMER_COMPLETED_NOTIFICATION_ID)
+    }
+
+    fun removeResumeTimerNotification() {
+        notificationManager.cancel(TIMER_RESUME_NOTIFICATION_ID)
     }
 
     private fun createNotificationChannels() {
@@ -166,4 +225,5 @@ private const val TIMER_SERVICE_NOTIFICATION_CHANNEL_ID = "timer_service_notific
 private const val TIMER_COMPLETED_NOTIFICATION_CHANNEL_ID = "timer_completed_notification_channel"
 private const val REWARD_UNLOCKED_NOTIFICATION_CHANNEL_ID = "reward_unlocked_notification_channel"
 const val TIMER_SERVICE_NOTIFICATION_ID = -1
-private const val TIMER_COMPLETED_NOTIFICATION_ID = -2
+const val TIMER_RESUME_NOTIFICATION_ID = -2
+private const val TIMER_COMPLETED_NOTIFICATION_ID = -3

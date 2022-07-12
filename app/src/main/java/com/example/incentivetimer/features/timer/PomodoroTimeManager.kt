@@ -78,6 +78,7 @@ class PomodoroTimeManager @Inject constructor(
         if (timerRunning) {
             stopTimer()
         } else {
+            notificationHelper.removeResumeTimerNotification()
             startTimer()
         }
     }
